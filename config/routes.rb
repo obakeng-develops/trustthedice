@@ -3,6 +3,8 @@ Rails.application.routes.draw do
 
   root "games#new"
 
+  get "rules", to: "rules#show", as: :rules
+
   resources :games, only: [ :create ] do
     member do
       get :join
