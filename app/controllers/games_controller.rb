@@ -13,10 +13,13 @@ class GamesController < ApplicationController
   def show
     @teams = @game.teams.includes(:players)
     @round = @game.rounds.order(number: :desc).first
+    @turn = @round&.turns&.order(created_at: :desc)&.first
   end
 
   def join
     @teams = @game.teams.order(:name)
+    @round = @game.rounds.order(number: :desc).first
+    @turn = @round&.turns&.order(created_at: :desc)&.first
   end
 
   private

@@ -59,4 +59,32 @@
       <% end %>
     <% end %>
   </section>
+
+  <% if @round.present? %>
+    <% reps_ready = @teams.all? { |team| @round.reps[team.id.to_s].present? } %>
+    <section class="card">
+      <h2>Start Turn</h2>
+
+      <% if reps_ready %>
+        <%= form_with url: turns_game_path(@game), method: :post do |form| %>
+          <div class="field">
+            <%= form.label :team_id, "Team" %>
+            <%= select_tag "turn[team_id]", options_from_collection_for_select(@teams, :id, :name), required: true %>
+          </div>
+          <%= form.submit "Start Turn" %>
+        <% end %>
+      <% else %>
+        <p class="muted">Assign representatives for all teams to start a turn.</p>
+      <% end %>
+
+      <% if @turn %>
+        <p class="muted">
+          Current turn: <strong><%= @turn.team.name %></strong>
+          <% if @turn.rep %>
+            · Rep: <%= @turn.rep.name %>
+          <% end %>
+        </p>
+      <% end %>
+    </section>
+  <% end %>
 </main>

@@ -3,7 +3,39 @@
 
   <% if current_player %>
     <p>You are in as <strong><%= current_player.name %></strong>.</p>
-    <p class="muted">Waiting for the host to start the round.</p>
+    <p class="muted">
+      <%= @round.present? ? "Waiting for the host to start a turn." : "Waiting for the host to start the round." %>
+    </p>
+    <% if @round.present? && @turn.nil? %>
+      <section class="card">
+        <h2>Round <%= @round.number %> Started</h2>
+        <% if @teams.any? %>
+          <ul class="list">
+            <% @teams.each do |team| %>
+              <% rep_id = @round.reps[team.id.to_s] %>
+              <% rep = team.players.find { |player| player.id == rep_id.to_i } %>
+              <li>
+                <strong><%= team.name %></strong>
+                <span class="muted">Rep: <%= rep ? rep.name : "Not assigned" %></span>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="muted">Teams are being set up.</p>
+        <% end %>
+        <p class="muted">Waiting for the host to start a turn.</p>
+      </section>
+    <% elsif @turn.present? %>
+      <section class="card">
+        <h2>Current Turn</h2>
+        <p>
+          Team: <strong><%= @turn.team.name %></strong>
+          <% if @turn.rep %>
+            · Rep: <%= @turn.rep.name %>
+          <% end %>
+        </p>
+      </section>
+    <% end %>
   <% elsif @teams.any? %>
     <%= form_with url: players_game_path(@game), method: :post do |form| %>
       <div class="field">
