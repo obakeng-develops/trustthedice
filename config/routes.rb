@@ -9,6 +9,7 @@ Rails.application.routes.draw do
       post :players, to: "players#create"
       post :teams, to: "teams#create"
       post :rounds, to: "rounds#create"
+      post :turns, to: "turns#create"
     end
   end
 
