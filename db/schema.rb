@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_13_074735) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_13_081755) do
   create_table "buzzes", force: :cascade do |t|
     t.integer "turn_id", null: false
     t.integer "team_id", null: false
@@ -95,12 +95,24 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_13_074735) do
     t.datetime "steal_started_at"
     t.integer "steal_winner_team_id"
     t.integer "steal_winner_player_id"
+    t.integer "question_id"
+    t.json "question_payload"
+    t.string "question_source"
+    t.integer "chaos_roll"
+    t.string "chaos_effect"
+    t.integer "swap_target_team_id"
+    t.integer "swap_roll"
+    t.string "swap_difficulty"
+    t.datetime "timer_started_at"
+    t.integer "timer_seconds"
+    t.index ["question_id"], name: "index_turns_on_question_id"
     t.index ["rep_id"], name: "index_turns_on_rep_id"
     t.index ["round_id"], name: "index_turns_on_round_id"
     t.index ["steal_open"], name: "index_turns_on_steal_open"
     t.index ["steal_team_id"], name: "index_turns_on_steal_team_id"
     t.index ["steal_winner_player_id"], name: "index_turns_on_steal_winner_player_id"
     t.index ["steal_winner_team_id"], name: "index_turns_on_steal_winner_team_id"
+    t.index ["swap_target_team_id"], name: "index_turns_on_swap_target_team_id"
     t.index ["team_id"], name: "index_turns_on_team_id"
   end
 
