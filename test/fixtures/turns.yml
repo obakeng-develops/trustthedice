@@ -1,0 +1,29 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  round: one
+  team: one
+  rep_id: 1
+  topic: MyString
+  difficulty: MyString
+  chaos_outcome: MyString
+  multiplier: false
+  lifeline_type: MyString
+  answered_correct: false
+  steal_team_id: 1
+  steal_correct: false
+  points_awarded: 1
+
+two:
+  round: two
+  team: two
+  rep_id: 1
+  topic: MyString
+  difficulty: MyString
+  chaos_outcome: MyString
+  multiplier: false
+  lifeline_type: MyString
+  answered_correct: false
+  steal_team_id: 1
+  steal_correct: false
+  points_awarded: 1

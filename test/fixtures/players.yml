@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  team: one
+  name: MyString
+  is_host: false
+  online: false
+
+two:
+  team: two
+  name: MyString
+  is_host: false
+  online: false
