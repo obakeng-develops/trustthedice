@@ -1,6 +1,6 @@
 class GamesController < ApplicationController
-  before_action :set_game, only: [ :show, :join ]
-  before_action :require_host_token, only: [ :show ]
+  before_action :set_game, only: [ :show, :join, :update_settings ]
+  before_action :require_host_token, only: [ :show, :update_settings ]
 
   def new
   end
@@ -22,6 +22,13 @@ class GamesController < ApplicationController
     @turn = @round&.turns&.order(created_at: :desc)&.first
   end
 
+  def update_settings
+    settings = @game.settings.merge(game_settings_params)
+    @game.update!(settings: settings)
+    GameBroadcaster.broadcast(@game)
+    redirect_to host_game_path(@game, token: @game.host_token)
+  end
+
   private
 
   def set_game
@@ -32,5 +39,11 @@ class GamesController < ApplicationController
     return if params[:token] == @game.host_token
 
     head :not_found
+  end
+
+  def game_settings_params
+    permitted = params.require(:game).permit(:questions_per_rep)
+    permitted[:questions_per_rep] = permitted[:questions_per_rep].to_i if permitted[:questions_per_rep]
+    permitted
   end
 end

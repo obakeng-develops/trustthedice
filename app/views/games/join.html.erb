@@ -1,28 +1,30 @@
-<main class="page">
+<main class="mx-auto w-full max-w-3xl px-6 py-10">
   <%= turbo_stream_from "game_#{@game.id}" %>
-  <h1>Join Game</h1>
+  <div class="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+    <h1 class="text-2xl font-semibold text-stone-900">Join Game</h1>
 
-  <% if current_player %>
-    <p>You are in as <strong><%= current_player.name %></strong>.</p>
-    <p class="muted">
-      <%= @round.present? ? "Waiting for the host to start a turn." : "Waiting for the host to start the round." %>
-    </p>
-    <div id="player-state">
-      <%= render "player_state", game: @game %>
-    </div>
-  <% elsif @teams.any? %>
-    <%= form_with url: players_game_path(@game), method: :post do |form| %>
-      <div class="field">
-        <%= form.label :name, "Your name" %>
-        <%= form.text_field :name, name: "player[name]", required: true %>
+    <% if current_player %>
+      <p class="mt-3 text-sm text-stone-600">You are in as <strong class="text-stone-900"><%= current_player.name %></strong>.</p>
+      <p class="mt-1 text-sm text-stone-500">
+        <%= @round.present? ? "Waiting for the host to start a turn." : "Waiting for the host to start the round." %>
+      </p>
+      <div id="player-state" class="mt-4">
+        <%= render "player_state", game: @game %>
       </div>
-      <div class="field">
-        <%= form.label :team_id, "Choose team" %>
-        <%= select_tag "player[team_id]", options_from_collection_for_select(@teams, :id, :name), required: true %>
-      </div>
-      <%= form.submit "Join" %>
+    <% elsif @teams.any? %>
+      <%= form_with url: players_game_path(@game), method: :post, class: "mt-4 grid gap-4" do |form| %>
+        <div class="grid gap-2">
+          <%= form.label :name, "Your name", class: "text-sm text-stone-600" %>
+          <%= form.text_field :name, name: "player[name]", required: true, class: "rounded-xl border border-stone-200 px-4 py-2 text-sm" %>
+        </div>
+        <div class="grid gap-2">
+          <%= form.label :team_id, "Choose team", class: "text-sm text-stone-600" %>
+          <%= select_tag "player[team_id]", options_from_collection_for_select(@teams, :id, :name), required: true, class: "rounded-xl border border-stone-200 px-4 py-2 text-sm" %>
+        </div>
+        <%= form.submit "Join", class: "rounded-full bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-700" %>
+      <% end %>
+    <% else %>
+      <p class="mt-3 text-sm text-stone-500">No teams yet. Ask the host to add teams.</p>
     <% end %>
-  <% else %>
-    <p class="muted">No teams yet. Ask the host to add teams.</p>
-  <% end %>
+  </div>
 </main>

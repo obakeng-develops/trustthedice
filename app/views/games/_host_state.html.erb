@@ -1,50 +1,190 @@
 <% round = game.rounds.order(number: :desc).first %>
 <% turn = round&.turns&.order(created_at: :desc)&.first %>
+<% focus_dice = local_assigns.fetch(:focus_dice, false) %>
 
-<section class="card">
-  <h2>Round Setup</h2>
+<section class="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h2 class="text-lg font-semibold text-stone-900">Round Setup</h2>
+    <%= button_to "Start New Round", rounds_game_path(game), method: :post, class: "rounded-full bg-stone-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-stone-800" %>
+  </div>
 
-  <%= button_to "Start New Round", rounds_game_path(game), method: :post %>
+  <div class="mt-4 flex flex-wrap items-end gap-3">
+    <%= form_with model: game, url: update_settings_game_path(game, token: game.host_token), method: :patch, class: "flex flex-wrap items-end gap-3" do |form| %>
+      <div class="grid gap-2">
+        <%= form.label :questions_per_rep, "Questions per rep", class: "text-xs uppercase tracking-[0.2em] text-stone-500" %>
+        <%= form.number_field :questions_per_rep, value: game.settings["questions_per_rep"].presence || 3, min: 1, max: 10, class: "w-24 rounded-xl border border-stone-200 px-3 py-2 text-sm" %>
+      </div>
+      <%= form.submit "Save", class: "rounded-full bg-stone-200 px-4 py-2 text-xs font-semibold text-stone-700 transition hover:bg-stone-300" %>
+    <% end %>
+  </div>
 
   <% if round.present? %>
-    <h3>Round <%= round.number %> Representatives</h3>
+    <h3 class="mt-4 text-sm font-semibold uppercase tracking-[0.2em] text-stone-500">Round <%= round.number %> Representatives</h3>
 
-    <%= form_with model: round, url: round_path(round), method: :patch do |form| %>
+    <%= form_with model: round, url: round_path(round), method: :patch, class: "mt-4 grid gap-4" do |form| %>
       <% game.teams.each do |team| %>
-        <div class="field">
-          <%= form.label "rep_#{team.id}", "#{team.name} rep" %>
-          <%= select_tag "round[reps][#{team.id}]", options_from_collection_for_select(team.players, :id, :name, round.reps[team.id.to_s]), include_blank: true %>
+        <div class="grid gap-2">
+          <%= form.label "rep_#{team.id}", "#{team.name} rep", class: "text-sm text-stone-600" %>
+          <%= select_tag "round[reps][#{team.id}]", options_from_collection_for_select(team.players, :id, :name, round.reps[team.id.to_s]), include_blank: true, class: "rounded-xl border border-stone-200 px-4 py-2 text-sm" %>
         </div>
       <% end %>
-      <%= form.submit "Save Reps" %>
+      <%= form.submit "Save Reps", class: "mt-2 rounded-full bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-700" %>
     <% end %>
   <% end %>
 </section>
 
 <% if round.present? %>
   <% reps_ready = game.teams.all? { |team| round.reps[team.id.to_s].present? } %>
-  <section class="card">
-    <h2>Start Turn</h2>
+  <section class="mt-6 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm" id="start-turn">
+    <h2 class="text-lg font-semibold text-stone-900">Start Turn</h2>
 
     <% if reps_ready %>
-      <%= form_with url: turns_game_path(game), method: :post do |form| %>
-        <div class="field">
-          <%= form.label :team_id, "Team" %>
-          <%= select_tag "turn[team_id]", options_from_collection_for_select(game.teams, :id, :name), required: true %>
+      <%= form_with url: turns_game_path(game), method: :post, class: "mt-3 flex flex-wrap gap-3" do |form| %>
+        <div class="grid gap-2">
+          <%= form.label :team_id, "Team", class: "text-sm text-stone-600" %>
+          <%= select_tag "turn[team_id]", options_from_collection_for_select(game.teams, :id, :name), required: true, class: "rounded-xl border border-stone-200 px-4 py-2 text-sm" %>
         </div>
-        <%= form.submit "Start Turn" %>
+        <div class="flex items-end">
+          <%= form.submit "Start Turn", class: "rounded-full bg-stone-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-stone-800" %>
+        </div>
       <% end %>
     <% else %>
-      <p class="muted">Assign representatives for all teams to start a turn.</p>
+      <p class="mt-2 text-sm text-stone-500">Assign representatives for all teams to start a turn.</p>
     <% end %>
 
     <% if turn %>
-      <p class="muted">
-        Current turn: <strong><%= turn.team.name %></strong>
+      <% questions_per_rep = (game.settings["questions_per_rep"].presence || 3).to_i %>
+      <% rep_count = round.rep_question_count(turn.rep_id) %>
+      <% question_index = [rep_count + 1, questions_per_rep].min %>
+      <p class="mt-3 text-sm text-stone-600">
+        Current turn: <strong class="text-stone-900"><%= turn.team.name %></strong>
         <% if turn.rep %>
           · Rep: <%= turn.rep.name %>
         <% end %>
       </p>
+      <p class="mt-1 text-xs text-stone-500">
+        Question <%= question_index %> of <%= questions_per_rep %>
+        <% if rep_count >= questions_per_rep %>
+          · Rep complete
+        <% end %>
+      </p>
     <% end %>
   </section>
+<% end %>
+
+<% if turn %>
+  <section class="mt-6 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm" id="dice-results" data-controller="focus-on-connect" data-focus-on-connect-enabled-value="<%= focus_dice %>">
+    <h2 class="text-lg font-semibold text-stone-900">Dice Results</h2>
+    <%= form_with url: update_manual_turn_path(turn), method: :patch, class: "mt-4 grid gap-4" do |form| %>
+      <div class="grid gap-2">
+        <%= form.label :topic, "Topic", class: "text-sm text-stone-600" %>
+        <%= select_tag "turn[topic]", options_for_select(Turn::TOPICS, turn.topic), include_blank: "Select topic", class: "rounded-xl border border-stone-200 px-4 py-2 text-sm" %>
+      </div>
+      <div class="grid gap-2">
+        <%= form.label :difficulty, "Difficulty", class: "text-sm text-stone-600" %>
+        <%= select_tag "turn[difficulty]", options_for_select(Turn::DIFFICULTIES, turn.difficulty), include_blank: "Select difficulty", class: "rounded-xl border border-stone-200 px-4 py-2 text-sm" %>
+      </div>
+      <div class="flex flex-wrap items-center gap-4 text-sm text-stone-600">
+        <label class="flex items-center gap-2">
+          <%= hidden_field_tag "turn[reroll_topic_used]", "0" %>
+          <%= check_box_tag "turn[reroll_topic_used]", "1", turn.reroll_topic_used, class: "h-4 w-4 rounded border-stone-300" %>
+          Re-roll used (topic)
+        </label>
+        <label class="flex items-center gap-2">
+          <%= hidden_field_tag "turn[reroll_difficulty_used]", "0" %>
+          <%= check_box_tag "turn[reroll_difficulty_used]", "1", turn.reroll_difficulty_used, class: "h-4 w-4 rounded border-stone-300" %>
+          Re-roll used (difficulty)
+        </label>
+      </div>
+      <%= form.submit "Save Dice Results", class: "rounded-full bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-700" %>
+    <% end %>
+    <% if turn.topic.blank? || turn.difficulty.blank? %>
+      <p class="mt-3 text-sm text-stone-500">Topic and difficulty must be set before assigning a question.</p>
+    <% end %>
+  </section>
+
+  <% dice_ready = turn.topic.present? && turn.difficulty.present? %>
+  <% question_payload = turn.question_payload || {} %>
+  <% question_prompt = turn.question&.prompt || question_payload["prompt"] %>
+  <% question_answer = turn.question&.correct_answer || question_payload["correct_answer"] %>
+  <% question_options = turn.question&.options || question_payload["options"] %>
+  <% question_qtype = turn.question&.qtype || question_payload["qtype"] %>
+  <% answered = !turn.answered_correct.nil? %>
+  <% ready_for_next = turn.state == "ready_for_next" %>
+  <% rep_done = rep_count >= questions_per_rep %>
+
+  <% if dice_ready %>
+    <section class="mt-6 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm" id="question-panel">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <h2 class="text-lg font-semibold text-stone-900">Question</h2>
+      <%= button_to "Assign Question", assign_question_turn_path(turn), method: :patch, disabled: turn.topic.blank? || turn.difficulty.blank?, class: "rounded-full bg-stone-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-stone-800 disabled:bg-stone-300" %>
+    </div>
+
+    <% if question_prompt.present? %>
+      <p class="mt-3 text-sm text-stone-700"><strong class="text-stone-900">Q:</strong> <%= question_prompt %></p>
+      <% if question_qtype == "mc" && question_options.present? %>
+        <ul class="mt-3 grid gap-2">
+          <% question_options.each do |option| %>
+            <li class="rounded-xl border border-stone-100 bg-stone-50 px-3 py-2 text-sm text-stone-600"><%= option %></li>
+          <% end %>
+        </ul>
+      <% end %>
+      <p class="mt-3 text-sm text-stone-600"><strong class="text-stone-900">Answer:</strong> <%= question_answer %></p>
+    <% else %>
+      <p class="mt-3 text-sm text-stone-500">No question assigned yet.</p>
+    <% end %>
+    </section>
+  <% elsif turn.topic.present? || turn.difficulty.present? %>
+    <section class="mt-6 rounded-3xl border border-stone-100 bg-stone-50 p-5">
+      <p class="text-sm text-stone-600">Dice results saved. Next: assign a question.</p>
+      <p class="mt-2 text-xs text-stone-500">Topic: <%= turn.topic || "--" %> · Difficulty: <%= turn.difficulty || "--" %></p>
+    </section>
+  <% end %>
+
+  <% if question_prompt.present? %>
+    <section class="mt-6 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+      <h2 class="text-lg font-semibold text-stone-900">Answer</h2>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <%= button_to "Correct", mark_correct_turn_path(turn), method: :patch, disabled: question_prompt.blank?, class: "rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:bg-emerald-200" %>
+        <%= button_to "Incorrect", mark_incorrect_turn_path(turn), method: :patch, disabled: question_prompt.blank?, class: "rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:bg-rose-200" %>
+      </div>
+      <% if turn.points_awarded %>
+        <p class="mt-3 text-sm text-stone-600">Points applied: <%= turn.points_awarded %></p>
+      <% end %>
+    </section>
+  <% end %>
+
+  <% if turn.answered_correct == false %>
+    <section class="mt-6 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+      <h2 class="text-lg font-semibold text-stone-900">Steal Window</h2>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <% if turn.steal_open? %>
+          <%= button_to "Close Steal", close_steal_turn_path(turn), method: :patch, class: "rounded-full bg-stone-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-stone-800" %>
+        <% else %>
+          <%= button_to "Open Steal", open_steal_turn_path(turn), method: :patch, class: "rounded-full bg-stone-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-stone-800" %>
+        <% end %>
+        <%= button_to "Award Steal", award_steal_turn_path(turn, steal_correct: true), method: :patch, disabled: turn.steal_winner_team_id.blank?, class: "rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700 disabled:bg-emerald-200" %>
+        <%= button_to "Steal Failed", award_steal_turn_path(turn, steal_correct: false), method: :patch, disabled: turn.steal_winner_team_id.blank?, class: "rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-rose-700 disabled:bg-rose-200" %>
+      </div>
+      <p class="mt-3 text-sm text-stone-600">
+        Steal status: <%= turn.steal_open? ? "open" : "closed" %>
+        <% if turn.steal_winner_team %>
+          · First buzz: <%= turn.steal_winner_team.name %> (<%= turn.steal_winner_player&.name %>)
+        <% end %>
+      </p>
+    </section>
+  <% end %>
+
+  <% if ready_for_next %>
+    <section class="mt-6 rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+      <h2 class="text-lg font-semibold text-stone-900">Next Step</h2>
+      <% if rep_done %>
+        <p class="mt-2 text-sm text-stone-700">Rep complete. Start the next turn.</p>
+        <a href="#start-turn" class="mt-3 inline-flex rounded-full bg-stone-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-stone-800">Start Next Turn</a>
+      <% else %>
+        <p class="mt-2 text-sm text-stone-700">Ready for the next question.</p>
+        <%= button_to "Next Question", next_question_turn_path(turn), method: :patch, class: "mt-3 rounded-full bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-700" %>
+      <% end %>
+    </section>
+  <% end %>
 <% end %>

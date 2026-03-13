@@ -24,6 +24,6 @@ class Game < ApplicationRecord
 
   def set_defaults
     self.status ||= "lobby"
-    self.settings ||= { "chaos_enabled" => true, "timer_seconds" => 30, "question_mix" => "auto" }
+    self.settings ||= { "chaos_enabled" => true, "timer_seconds" => 30, "question_mix" => "auto", "questions_per_rep" => 3 }
   end
 end

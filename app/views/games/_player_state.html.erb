@@ -2,32 +2,36 @@
 <% turn = round&.turns&.order(created_at: :desc)&.first %>
 
 <% if round.present? && turn.nil? %>
-  <section class="card">
-    <h2>Round <%= round.number %> Started</h2>
+  <section class="rounded-2xl border border-stone-200 bg-stone-50/80 p-4">
+    <h2 class="text-base font-semibold text-stone-900">Round <%= round.number %> Started</h2>
     <% if game.teams.any? %>
-      <ul class="list">
+      <ul class="mt-3 grid gap-2">
         <% game.teams.each do |team| %>
           <% rep_id = round.reps[team.id.to_s] %>
           <% rep = team.players.find { |player| player.id == rep_id.to_i } %>
-          <li>
-            <strong><%= team.name %></strong>
-            <span class="muted">Rep: <%= rep ? rep.name : "Not assigned" %></span>
+          <li class="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-sm text-stone-700">
+            <strong class="text-stone-900"><%= team.name %></strong>
+            <span class="text-stone-500">Rep: <%= rep ? rep.name : "Not assigned" %></span>
           </li>
         <% end %>
       </ul>
     <% else %>
-      <p class="muted">Teams are being set up.</p>
+      <p class="mt-2 text-sm text-stone-500">Teams are being set up.</p>
     <% end %>
-    <p class="muted">Waiting for the host to start a turn.</p>
+    <p class="mt-3 text-sm text-stone-500">Waiting for the host to start a turn.</p>
   </section>
 <% elsif turn.present? %>
-  <section class="card">
-    <h2>Current Turn</h2>
-    <p>
-      Team: <strong><%= turn.team.name %></strong>
+  <section class="rounded-2xl border border-stone-200 bg-stone-50/80 p-4">
+    <h2 class="text-base font-semibold text-stone-900">Current Turn</h2>
+    <p class="mt-2 text-sm text-stone-600">
+      Team: <strong class="text-stone-900"><%= turn.team.name %></strong>
       <% if turn.rep %>
         · Rep: <%= turn.rep.name %>
       <% end %>
     </p>
+    <% questions_per_rep = (game.settings["questions_per_rep"].presence || 3).to_i %>
+    <% rep_count = round.rep_question_count(turn.rep_id) %>
+    <% question_index = [rep_count + 1, questions_per_rep].min %>
+    <p class="mt-1 text-xs text-stone-500">Question <%= question_index %> of <%= questions_per_rep %></p>
   </section>
 <% end %>
