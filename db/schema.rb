@@ -17,9 +17,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_13_074735) do
     t.integer "player_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["player_id"], name: "index_buzzes_on_player_id"
-    t.index ["team_id"], name: "index_buzzes_on_team_id"
-    t.index ["turn_id"], name: "index_buzzes_on_turn_id"
+    t.index [ "player_id" ], name: "index_buzzes_on_player_id"
+    t.index [ "team_id" ], name: "index_buzzes_on_team_id"
+    t.index [ "turn_id" ], name: "index_buzzes_on_turn_id"
   end
 
   create_table "games", force: :cascade do |t|
@@ -28,7 +28,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_13_074735) do
     t.json "settings", default: {}
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["host_token"], name: "index_games_on_host_token", unique: true
+    t.index [ "host_token" ], name: "index_games_on_host_token", unique: true
   end
 
   create_table "players", force: :cascade do |t|
@@ -38,7 +38,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_13_074735) do
     t.boolean "online", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["team_id"], name: "index_players_on_team_id"
+    t.index [ "team_id" ], name: "index_players_on_team_id"
   end
 
   create_table "questions", force: :cascade do |t|
@@ -62,7 +62,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_13_074735) do
     t.integer "question_index", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["game_id"], name: "index_rounds_on_game_id"
+    t.index [ "game_id" ], name: "index_rounds_on_game_id"
   end
 
   create_table "teams", force: :cascade do |t|
@@ -73,7 +73,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_13_074735) do
     t.boolean "lifeline_team_used", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["game_id"], name: "index_teams_on_game_id"
+    t.index [ "game_id" ], name: "index_teams_on_game_id"
   end
 
   create_table "turns", force: :cascade do |t|
@@ -95,13 +95,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_13_074735) do
     t.datetime "steal_started_at"
     t.integer "steal_winner_team_id"
     t.integer "steal_winner_player_id"
-    t.index ["rep_id"], name: "index_turns_on_rep_id"
-    t.index ["round_id"], name: "index_turns_on_round_id"
-    t.index ["steal_open"], name: "index_turns_on_steal_open"
-    t.index ["steal_team_id"], name: "index_turns_on_steal_team_id"
-    t.index ["steal_winner_player_id"], name: "index_turns_on_steal_winner_player_id"
-    t.index ["steal_winner_team_id"], name: "index_turns_on_steal_winner_team_id"
-    t.index ["team_id"], name: "index_turns_on_team_id"
+    t.index [ "rep_id" ], name: "index_turns_on_rep_id"
+    t.index [ "round_id" ], name: "index_turns_on_round_id"
+    t.index [ "steal_open" ], name: "index_turns_on_steal_open"
+    t.index [ "steal_team_id" ], name: "index_turns_on_steal_team_id"
+    t.index [ "steal_winner_player_id" ], name: "index_turns_on_steal_winner_player_id"
+    t.index [ "steal_winner_team_id" ], name: "index_turns_on_steal_winner_team_id"
+    t.index [ "team_id" ], name: "index_turns_on_team_id"
   end
 
   add_foreign_key "buzzes", "players"
