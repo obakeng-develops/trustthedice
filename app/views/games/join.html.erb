@@ -1,0 +1,22 @@
+<main class="page">
+  <h1>Join Game</h1>
+
+  <% if current_player %>
+    <p>You are in as <strong><%= current_player.name %></strong>.</p>
+    <p class="muted">Waiting for the host to start the round.</p>
+  <% elsif @teams.any? %>
+    <%= form_with url: players_game_path(@game), method: :post do |form| %>
+      <div class="field">
+        <%= form.label :name, "Your name" %>
+        <%= form.text_field :name, name: "player[name]", required: true %>
+      </div>
+      <div class="field">
+        <%= form.label :team_id, "Choose team" %>
+        <%= select_tag "player[team_id]", options_from_collection_for_select(@teams, :id, :name), required: true %>
+      </div>
+      <%= form.submit "Join" %>
+    <% end %>
+  <% else %>
+    <p class="muted">No teams yet. Ask the host to add teams.</p>
+  <% end %>
+</main>

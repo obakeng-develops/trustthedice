@@ -1,0 +1,108 @@
+# This file is auto-generated from the current state of the database. Instead
+# of editing this file, please use the migrations feature of Active Record to
+# incrementally modify your database, and then regenerate this schema definition.
+#
+# This file is the source Rails uses to define your schema when running `bin/rails
+# db:schema:load`. When creating a new database, `bin/rails db:schema:load` tends to
+# be faster and is potentially less error prone than running all of your
+# migrations from scratch. Old migrations may fail to apply correctly if those
+# migrations use external dependencies or application code.
+#
+# It's strongly recommended that you check this file into your version control system.
+
+ActiveRecord::Schema[8.0].define(version: 2026_03_13_072920) do
+  create_table "buzzes", force: :cascade do |t|
+    t.integer "turn_id", null: false
+    t.integer "team_id", null: false
+    t.integer "player_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["player_id"], name: "index_buzzes_on_player_id"
+    t.index ["team_id"], name: "index_buzzes_on_team_id"
+    t.index ["turn_id"], name: "index_buzzes_on_turn_id"
+  end
+
+  create_table "games", force: :cascade do |t|
+    t.string "status", default: "lobby", null: false
+    t.string "host_token", null: false
+    t.json "settings", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["host_token"], name: "index_games_on_host_token", unique: true
+  end
+
+  create_table "players", force: :cascade do |t|
+    t.integer "team_id", null: false
+    t.string "name", null: false
+    t.boolean "is_host", default: false, null: false
+    t.boolean "online", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["team_id"], name: "index_players_on_team_id"
+  end
+
+  create_table "questions", force: :cascade do |t|
+    t.string "topic"
+    t.string "difficulty"
+    t.string "qtype"
+    t.text "prompt"
+    t.string "correct_answer"
+    t.json "aliases"
+    t.json "options"
+    t.string "source"
+    t.string "region"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "rounds", force: :cascade do |t|
+    t.integer "game_id", null: false
+    t.integer "number", null: false
+    t.json "reps", default: {}
+    t.integer "question_index", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["game_id"], name: "index_rounds_on_game_id"
+  end
+
+  create_table "teams", force: :cascade do |t|
+    t.integer "game_id", null: false
+    t.string "name", null: false
+    t.integer "score", default: 0, null: false
+    t.boolean "lifeline_single_used", default: false, null: false
+    t.boolean "lifeline_team_used", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["game_id"], name: "index_teams_on_game_id"
+  end
+
+  create_table "turns", force: :cascade do |t|
+    t.integer "round_id", null: false
+    t.integer "team_id", null: false
+    t.integer "rep_id"
+    t.string "topic"
+    t.string "difficulty"
+    t.string "chaos_outcome"
+    t.boolean "multiplier", default: false, null: false
+    t.string "lifeline_type"
+    t.boolean "answered_correct"
+    t.integer "steal_team_id"
+    t.boolean "steal_correct"
+    t.integer "points_awarded"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["rep_id"], name: "index_turns_on_rep_id"
+    t.index ["round_id"], name: "index_turns_on_round_id"
+    t.index ["steal_team_id"], name: "index_turns_on_steal_team_id"
+    t.index ["team_id"], name: "index_turns_on_team_id"
+  end
+
+  add_foreign_key "buzzes", "players"
+  add_foreign_key "buzzes", "teams"
+  add_foreign_key "buzzes", "turns"
+  add_foreign_key "players", "teams"
+  add_foreign_key "rounds", "games"
+  add_foreign_key "teams", "games"
+  add_foreign_key "turns", "rounds"
+  add_foreign_key "turns", "teams"
+end
