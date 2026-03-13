@@ -26,7 +26,10 @@ class GamesController < ApplicationController
     settings = @game.settings.merge(game_settings_params)
     @game.update!(settings: settings)
     GameBroadcaster.broadcast(@game)
-    redirect_to host_game_path(@game, token: @game.host_token)
+    respond_to do |format|
+      format.turbo_stream { render turbo_stream: [] }
+      format.html { redirect_to host_game_path(@game, token: @game.host_token) }
+    end
   end
 
   private

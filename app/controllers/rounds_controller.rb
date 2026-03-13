@@ -5,7 +5,10 @@ class RoundsController < ApplicationController
     game.rounds.create!(number: number)
     game.update!(status: "round_setup")
     GameBroadcaster.broadcast(game)
-    redirect_to host_game_path(game, token: game.host_token)
+    respond_to do |format|
+      format.turbo_stream { render turbo_stream: [] }
+      format.html { redirect_to host_game_path(game, token: game.host_token) }
+    end
   end
 
   def update
@@ -13,7 +16,10 @@ class RoundsController < ApplicationController
     round.update!(round_params)
     round.game.update!(status: "question")
     GameBroadcaster.broadcast(round.game)
-    redirect_to host_game_path(round.game, token: round.game.host_token)
+    respond_to do |format|
+      format.turbo_stream { render turbo_stream: [] }
+      format.html { redirect_to host_game_path(round.game, token: round.game.host_token) }
+    end
   end
 
   private

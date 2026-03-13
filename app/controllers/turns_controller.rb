@@ -27,25 +27,37 @@ class TurnsController < ApplicationController
       state: "dice_ready"
     )
     GameBroadcaster.broadcast(game)
-    redirect_to host_game_path(game, token: game.host_token)
+    respond_to do |format|
+      format.turbo_stream { render turbo_stream: [] }
+      format.html { redirect_to host_game_path(game, token: game.host_token) }
+    end
   end
 
   def update_manual
     @turn.update!(manual_params.merge(state: "dice_ready"))
     GameBroadcaster.broadcast(@turn.round.game)
-    redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token)
+    respond_to do |format|
+      format.turbo_stream { render turbo_stream: [] }
+      format.html { redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token) }
+    end
   end
 
   def assign_question
     if @turn.topic.blank? || @turn.difficulty.blank?
       flash[:alert] = "Topic and difficulty must be set before assigning a question."
-      return redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token)
+      return respond_to do |format|
+        format.turbo_stream { render turbo_stream: [] }
+        format.html { redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token) }
+      end
     end
 
     question = QuestionPicker.new.pick(topic: @turn.topic, difficulty: @turn.difficulty)
     if question.nil?
       flash[:alert] = "No question available for that topic and difficulty."
-      return redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token)
+      return respond_to do |format|
+        format.turbo_stream { render turbo_stream: [] }
+        format.html { redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token) }
+      end
     end
 
     if question.is_a?(Question) && question.persisted?
@@ -68,7 +80,10 @@ class TurnsController < ApplicationController
     @turn.update!(state: "question_assigned")
 
     GameBroadcaster.broadcast(@turn.round.game)
-    redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token)
+    respond_to do |format|
+      format.turbo_stream { render turbo_stream: [] }
+      format.html { redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token) }
+    end
   end
 
   def mark_correct
@@ -77,7 +92,10 @@ class TurnsController < ApplicationController
     @turn.team.update!(score: @turn.team.score + points)
     @turn.round.increment_rep_question_count(@turn.rep_id)
     GameBroadcaster.broadcast(@turn.round.game)
-    redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token)
+    respond_to do |format|
+      format.turbo_stream { render turbo_stream: [] }
+      format.html { redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token) }
+    end
   end
 
   def mark_incorrect
@@ -87,19 +105,28 @@ class TurnsController < ApplicationController
     @turn.round.increment_rep_question_count(@turn.rep_id)
     @turn.update!(steal_open: true, steal_started_at: Time.current, steal_winner_team_id: nil, steal_winner_player_id: nil)
     GameBroadcaster.broadcast(@turn.round.game)
-    redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token)
+    respond_to do |format|
+      format.turbo_stream { render turbo_stream: [] }
+      format.html { redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token) }
+    end
   end
 
   def open_steal
     @turn.update!(steal_open: true, steal_started_at: Time.current, steal_winner_team_id: nil, steal_winner_player_id: nil)
     GameBroadcaster.broadcast(@turn.round.game)
-    redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token)
+    respond_to do |format|
+      format.turbo_stream { render turbo_stream: [] }
+      format.html { redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token) }
+    end
   end
 
   def close_steal
     @turn.update!(steal_open: false, state: "ready_for_next")
     GameBroadcaster.broadcast(@turn.round.game)
-    redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token)
+    respond_to do |format|
+      format.turbo_stream { render turbo_stream: [] }
+      format.html { redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token) }
+    end
   end
 
   def award_steal
@@ -117,7 +144,10 @@ class TurnsController < ApplicationController
     @turn.update!(state: "ready_for_next", steal_open: false)
 
     GameBroadcaster.broadcast(@turn.round.game)
-    redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token)
+    respond_to do |format|
+      format.turbo_stream { render turbo_stream: [] }
+      format.html { redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token) }
+    end
   end
 
   def next_question
@@ -141,7 +171,10 @@ class TurnsController < ApplicationController
     )
 
     GameBroadcaster.broadcast(@turn.round.game, focus_dice: true)
-    redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token)
+    respond_to do |format|
+      format.turbo_stream { render turbo_stream: [] }
+      format.html { redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token) }
+    end
   end
 
   private
