@@ -20,26 +20,15 @@
       <% end %>
     </p>
     <p class="muted">
-      Steal window: <%= turn.steal_open? ? "open" : "closed" %>
-      <% if turn.steal_winner_team %>
-        · First buzz: <%= turn.steal_winner_team.name %> (<%= turn.steal_winner_player&.name %>)
-      <% end %>
+      Topic: <%= turn.topic %> · Difficulty: <%= turn.difficulty %>
     </p>
-
-    <div class="inline-form">
-      <% if turn.steal_open? %>
-        <%= button_to "Close Steal Window", close_steal_turn_path(turn), method: :patch %>
-      <% else %>
-        <%= button_to "Open Steal Window", open_steal_turn_path(turn), method: :patch %>
-      <% end %>
-    </div>
   <% else %>
-    <p class="muted">No current turn. Start one to enable buzzing.</p>
+    <p class="muted">No current turn. Start one to enable game controls.</p>
   <% end %>
 </section>
 
 <section class="card">
-  <h2>Start Turn (Phase 1)</h2>
+  <h2>Start Turn</h2>
 
   <% if round && round.reps.present? %>
     <%= form_with url: turns_game_path(game), method: :post do |form| %>
@@ -53,3 +42,117 @@
     <p class="muted">Assign reps to start a turn.</p>
   <% end %>
 </section>
+
+<% if turn %>
+  <section class="card">
+    <h2>Rolls</h2>
+    <div class="inline-form">
+      <%= button_to "Roll Topic", roll_topic_turn_path(turn), method: :patch %>
+      <%= button_to "Roll Difficulty", roll_difficulty_turn_path(turn), method: :patch %>
+      <%= button_to "Roll Chaos", roll_chaos_turn_path(turn), method: :patch %>
+    </div>
+    <p class="muted">
+      Chaos outcome: <%= turn.chaos_outcome || "none" %>
+      <% if turn.chaos_roll %>
+        · Roll: <%= turn.chaos_roll %>
+      <% end %>
+    </p>
+
+    <% if turn.chaos_outcome == "double_choice" %>
+      <div class="inline-form">
+        <%= button_to "Double Points", set_chaos_effect_turn_path(turn, chaos_effect: "double_points"), method: :patch %>
+        <%= button_to "Double Penalty", set_chaos_effect_turn_path(turn, chaos_effect: "double_penalty"), method: :patch %>
+      </div>
+      <p class="muted">Chaos effect: <%= turn.chaos_effect || "pending" %></p>
+    <% elsif turn.chaos_outcome == "swap_difficulty" %>
+      <%= form_with url: swap_difficulty_turn_path(turn), method: :patch do |form| %>
+        <div class="field">
+          <%= form.label :swap_target_team_id, "Target team" %>
+          <%= select_tag "swap_target_team_id", options_from_collection_for_select(game.teams, :id, :name, turn.swap_target_team_id), required: true %>
+        </div>
+        <%= form.submit "Roll Swap Difficulty" %>
+      <% end %>
+      <% if turn.swap_roll %>
+        <p class="muted">Target roll: <%= turn.swap_roll %> → <%= turn.swap_difficulty %></p>
+      <% end %>
+    <% end %>
+  </section>
+
+  <section class="card">
+    <h2>Lifelines & Multiplier</h2>
+    <div class="inline-form">
+      <%= button_to "No Lifeline", set_lifeline_turn_path(turn, lifeline_type: "none"), method: :patch %>
+      <%= button_to "Single Teammate", set_lifeline_turn_path(turn, lifeline_type: "single"), method: :patch %>
+      <%= button_to "Whole Team", set_lifeline_turn_path(turn, lifeline_type: "team"), method: :patch %>
+      <%= button_to (turn.multiplier? ? "Multiplier x2 On" : "Multiplier x2 Off"), toggle_multiplier_turn_path(turn), method: :patch %>
+    </div>
+    <p class="muted">Lifeline: <%= turn.lifeline_type || "none" %></p>
+  </section>
+
+  <section class="card">
+    <h2>Question</h2>
+    <div class="inline-form">
+      <%= button_to "Assign Question", assign_question_turn_path(turn), method: :patch %>
+    </div>
+
+    <% question_payload = turn.question_payload || {} %>
+    <% question_prompt = turn.question&.prompt || question_payload["prompt"] %>
+    <% question_answer = turn.question&.correct_answer || question_payload["correct_answer"] %>
+    <% question_options = turn.question&.options || question_payload["options"] %>
+    <% question_qtype = turn.question&.qtype || question_payload["qtype"] %>
+
+    <% if question_prompt.present? %>
+      <p><strong>Q:</strong> <%= question_prompt %></p>
+      <% if question_qtype == "mc" && question_options.present? %>
+        <ul class="list">
+          <% question_options.each do |option| %>
+            <li class="muted"><%= option %></li>
+          <% end %>
+        </ul>
+      <% end %>
+      <p class="muted"><strong>Answer:</strong> <%= question_answer %></p>
+    <% else %>
+      <p class="muted">No question assigned yet.</p>
+    <% end %>
+  </section>
+
+  <section class="card">
+    <h2>Timer</h2>
+    <div class="inline-form">
+      <%= button_to "Start 30s Timer", start_timer_turn_path(turn), method: :patch %>
+    </div>
+    <div data-controller="timer" data-timer-started-at-value="<%= turn.timer_started_at&.iso8601 %>" data-timer-seconds-value="<%= turn.timer_seconds || game.settings["timer_seconds"] || 30 %>">
+      <strong data-timer-target="output">--</strong>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Answer</h2>
+    <div class="inline-form">
+      <%= button_to "Correct", mark_correct_turn_path(turn), method: :patch %>
+      <%= button_to "Incorrect", mark_incorrect_turn_path(turn), method: :patch %>
+    </div>
+    <% if turn.points_awarded %>
+      <p class="muted">Points applied: <%= turn.points_awarded %></p>
+    <% end %>
+  </section>
+
+  <section class="card">
+    <h2>Steal Window</h2>
+    <div class="inline-form">
+      <% if turn.steal_open? %>
+        <%= button_to "Close Steal", close_steal_turn_path(turn), method: :patch %>
+      <% else %>
+        <%= button_to "Open Steal", open_steal_turn_path(turn), method: :patch %>
+      <% end %>
+      <%= button_to "Award Steal", award_steal_turn_path(turn, steal_correct: true), method: :patch %>
+      <%= button_to "Steal Failed", award_steal_turn_path(turn, steal_correct: false), method: :patch %>
+    </div>
+    <p class="muted">
+      Steal status: <%= turn.steal_open? ? "open" : "closed" %>
+      <% if turn.steal_winner_team %>
+        · First buzz: <%= turn.steal_winner_team.name %> (<%= turn.steal_winner_player&.name %>)
+      <% end %>
+    </p>
+  </section>
+<% end %>

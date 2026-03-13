@@ -11,12 +11,22 @@
         · Rep: <%= turn.rep.name %>
       <% end %>
     </p>
-    <p class="muted">Steal window: <%= turn.steal_open? ? "open" : "closed" %></p>
+    <div data-controller="timer" data-timer-started-at-value="<%= turn.timer_started_at&.iso8601 %>" data-timer-seconds-value="<%= turn.timer_seconds || game.settings["timer_seconds"] || 30 %>">
+      <p class="muted">Time left: <strong data-timer-target="output">--</strong></p>
+    </div>
 
     <% if turn.steal_open? %>
-      <div data-controller="buzz" data-buzz-turn-id-value="<%= turn.id %>" data-buzz-player-id-value="<%= current_player&.id %>" data-buzz-game-id-value="<%= game.id %>">
-        <button type="button" data-action="buzz#send">Buzz</button>
+      <div class="steal-banner">
+        <p><strong>Steal open</strong> · Buzz now!</p>
+        <div data-controller="timer" data-timer-started-at-value="<%= turn.steal_started_at&.iso8601 %>" data-timer-seconds-value="<%= turn.timer_seconds || game.settings["timer_seconds"] || 30 %>">
+          <p class="muted">Steal time left: <strong data-timer-target="output">--</strong></p>
+        </div>
+        <div data-controller="buzz" data-buzz-turn-id-value="<%= turn.id %>" data-buzz-player-id-value="<%= current_player&.id %>" data-buzz-game-id-value="<%= game.id %>">
+          <button type="button" data-action="buzz#send">Buzz</button>
+        </div>
       </div>
+    <% else %>
+      <p class="muted">Steal window: closed</p>
     <% end %>
   <% else %>
     <p class="muted">Waiting for the host to start a turn.</p>

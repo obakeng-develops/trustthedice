@@ -125,6 +125,14 @@ input[type="submit"]:hover {
   font-size: 13px;
 }
 
+.steal-banner {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px dashed var(--accent);
+  background: #fff4e6;
+}
+
 @media (max-width: 720px) {
   h1 {
     font-size: 28px;
