@@ -1,0 +1,62 @@
+<main class="page">
+  <header class="page-header">
+    <h1>Host Dashboard</h1>
+    <div class="meta">Game <%= @game.id %> · Status: <%= @game.status %></div>
+  </header>
+
+  <section class="card">
+    <h2>Player Join Link</h2>
+    <p><%= join_game_url(@game) %></p>
+  </section>
+
+  <section class="card">
+    <h2>Teams</h2>
+
+    <%= form_with model: Team.new, url: teams_game_path(@game), method: :post, class: "inline-form" do |form| %>
+      <%= form.text_field :name, placeholder: "Team name", required: true %>
+      <%= form.submit "Add Team" %>
+    <% end %>
+
+    <% if @teams.any? %>
+      <ul class="list">
+        <% @teams.each do |team| %>
+          <li>
+            <strong><%= team.name %></strong>
+            <span class="muted">Score: <%= team.score %></span>
+            <% if team.players.any? %>
+              <div class="pill-row">
+                <% team.players.each do |player| %>
+                  <span class="pill"><%= player.name %></span>
+                <% end %>
+              </div>
+            <% else %>
+              <div class="muted">No players yet</div>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="muted">Add teams so players can join.</p>
+    <% end %>
+  </section>
+
+  <section class="card">
+    <h2>Round Setup</h2>
+
+    <%= button_to "Start New Round", rounds_game_path(@game), method: :post %>
+
+    <% if @round.present? %>
+      <h3>Round <%= @round.number %> Representatives</h3>
+
+      <%= form_with model: @round, url: round_path(@round), method: :patch do |form| %>
+        <% @teams.each do |team| %>
+          <div class="field">
+            <%= form.label "rep_#{team.id}", "#{team.name} rep" %>
+            <%= form.select "reps[#{team.id}]", options_from_collection_for_select(team.players, :id, :name, @round.reps[team.id.to_s]), include_blank: true %>
+          </div>
+        <% end %>
+        <%= form.submit "Save Reps" %>
+      <% end %>
+    <% end %>
+  </section>
+</main>
