@@ -71,6 +71,7 @@ class TurnsController < ApplicationController
     points = ScoreCalculator.call(@turn, correct: true)
     @turn.update!(answered_correct: true, points_awarded: points)
     @turn.team.update!(score: @turn.team.score + points)
+    @turn.round.increment_rep_question_count(@turn.rep_id)
     GameBroadcaster.broadcast(@turn.round.game)
     redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token)
   end
@@ -79,6 +80,7 @@ class TurnsController < ApplicationController
     points = ScoreCalculator.call(@turn, correct: false)
     @turn.update!(answered_correct: false, points_awarded: points)
     @turn.team.update!(score: @turn.team.score + points)
+    @turn.round.increment_rep_question_count(@turn.rep_id)
     @turn.update!(steal_open: true, steal_started_at: Time.current, steal_winner_team_id: nil, steal_winner_player_id: nil)
     GameBroadcaster.broadcast(@turn.round.game)
     redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token)
