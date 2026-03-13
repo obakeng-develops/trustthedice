@@ -1098,16 +1098,5 @@
     "options": [],
     "source": "sa_pack",
     "region": "south_africa"
-  },
-  {
-    "topic": "Geography",
-    "difficulty": "medium",
-    "qtype": "single",
-    "prompt": "What is the capital of KwaZulu-Natal?",
-    "correct_answer": "Pietermaritzburg",
-    "aliases": [],
-    "options": [],
-    "source": "sa_pack",
-    "region": "south_africa"
   }
 ]
