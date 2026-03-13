@@ -18,6 +18,18 @@ Rails.application.routes.draw do
   resources :rounds, only: [ :update ]
   resources :turns, only: [] do
     member do
+      patch :roll_topic
+      patch :roll_difficulty
+      patch :roll_chaos
+      patch :set_chaos_effect
+      patch :swap_difficulty
+      patch :set_lifeline
+      patch :toggle_multiplier
+      patch :assign_question
+      patch :start_timer
+      patch :mark_correct
+      patch :mark_incorrect
+      patch :award_steal
       patch :open_steal
       patch :close_steal
     end
