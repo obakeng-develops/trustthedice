@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_13_072920) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_13_074735) do
   create_table "buzzes", force: :cascade do |t|
     t.integer "turn_id", null: false
     t.integer "team_id", null: false
@@ -91,9 +91,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_13_072920) do
     t.integer "points_awarded"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "steal_open", default: false, null: false
+    t.datetime "steal_started_at"
+    t.integer "steal_winner_team_id"
+    t.integer "steal_winner_player_id"
     t.index ["rep_id"], name: "index_turns_on_rep_id"
     t.index ["round_id"], name: "index_turns_on_round_id"
+    t.index ["steal_open"], name: "index_turns_on_steal_open"
     t.index ["steal_team_id"], name: "index_turns_on_steal_team_id"
+    t.index ["steal_winner_player_id"], name: "index_turns_on_steal_winner_player_id"
+    t.index ["steal_winner_team_id"], name: "index_turns_on_steal_winner_team_id"
     t.index ["team_id"], name: "index_turns_on_team_id"
   end
 

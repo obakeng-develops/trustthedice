@@ -3,6 +3,8 @@ class Turn < ApplicationRecord
   belongs_to :team
   belongs_to :rep, class_name: "Player", optional: true
   belongs_to :steal_team, class_name: "Team", optional: true
+  belongs_to :steal_winner_team, class_name: "Team", optional: true
+  belongs_to :steal_winner_player, class_name: "Player", optional: true
 
   has_many :buzzes, dependent: :destroy
 
