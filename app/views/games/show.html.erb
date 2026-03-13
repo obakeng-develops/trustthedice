@@ -1,47 +1,55 @@
-<main class="page">
+<main class="mx-auto w-full max-w-6xl px-6 py-10">
   <%= turbo_stream_from "game_#{@game.id}" %>
-  <header class="page-header">
-    <h1>Host Dashboard</h1>
-    <div class="meta">Game <%= @game.id %> · Status: <%= @game.status %></div>
+  <header class="flex flex-col gap-2">
+    <p class="text-xs uppercase tracking-[0.3em] text-stone-500">Host dashboard</p>
+    <div class="flex flex-wrap items-end justify-between gap-3">
+      <h1 class="text-3xl font-semibold text-stone-900">Roll The Dice</h1>
+      <span class="rounded-full border border-stone-200 bg-white px-3 py-1 text-xs text-stone-600">
+        Game <%= @game.id %> · <%= @game.status %>
+      </span>
+    </div>
   </header>
 
-  <section class="card">
-    <h2>Player Join Link</h2>
-    <p><%= join_game_url(@game) %></p>
+  <section class="mt-6 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+    <h2 class="text-lg font-semibold text-stone-900">Player Join Link</h2>
+    <p class="mt-2 break-all text-sm text-stone-600"><%= join_game_url(@game) %></p>
   </section>
 
-  <section class="card">
-    <h2>Teams</h2>
-
-    <%= form_with model: Team.new, url: teams_game_path(@game), method: :post, class: "inline-form" do |form| %>
-      <%= form.text_field :name, placeholder: "Team name", required: true %>
-      <%= form.submit "Add Team" %>
-    <% end %>
+  <section class="mt-6 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <h2 class="text-lg font-semibold text-stone-900">Teams</h2>
+      <%= form_with model: Team.new, url: teams_game_path(@game), method: :post, class: "flex flex-wrap gap-2" do |form| %>
+        <%= form.text_field :name, placeholder: "Team name", required: true, class: "rounded-full border border-stone-200 px-4 py-2 text-sm" %>
+        <%= form.submit "Add Team", class: "rounded-full bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-700" %>
+      <% end %>
+    </div>
 
     <% if @teams.any? %>
-      <ul class="list">
+      <ul class="mt-4 grid gap-4 md:grid-cols-2">
         <% @teams.each do |team| %>
-          <li>
-            <strong><%= team.name %></strong>
-            <span class="muted">Score: <%= team.score %></span>
+          <li class="rounded-2xl border border-stone-100 bg-stone-50/80 p-4">
+            <div class="flex items-center justify-between">
+              <strong class="text-base text-stone-900"><%= team.name %></strong>
+              <span class="text-xs text-stone-500">Score: <%= team.score %></span>
+            </div>
             <% if team.players.any? %>
-              <div class="pill-row">
+              <div class="mt-3 flex flex-wrap gap-2">
                 <% team.players.each do |player| %>
-                  <span class="pill"><%= player.name %></span>
+                  <span class="rounded-full bg-stone-200 px-3 py-1 text-xs text-stone-700"><%= player.name %></span>
                 <% end %>
               </div>
             <% else %>
-              <div class="muted">No players yet</div>
+              <p class="mt-3 text-xs text-stone-500">No players yet</p>
             <% end %>
           </li>
         <% end %>
       </ul>
     <% else %>
-      <p class="muted">Add teams so players can join.</p>
+      <p class="mt-4 text-sm text-stone-500">Add teams so players can join.</p>
     <% end %>
   </section>
 
-  <div id="host-state">
+  <div id="host-state" class="mt-6">
     <%= render "host_state", game: @game %>
   </div>
 </main>
