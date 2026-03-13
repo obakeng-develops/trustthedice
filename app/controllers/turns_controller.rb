@@ -8,6 +8,7 @@ class TurnsController < ApplicationController
     rep_id = round.reps[team.id.to_s]
 
     round.turns.create!(team: team, rep_id: rep_id, topic: "pending", difficulty: "pending")
+    GameBroadcaster.broadcast(game)
     redirect_to host_game_path(game, token: game.host_token)
   end
 end
