@@ -16,4 +16,15 @@ Rails.application.routes.draw do
   get "games/:id/host/:token", to: "games#show", as: :host_game
 
   resources :rounds, only: [ :update ]
+  resources :turns, only: [] do
+    member do
+      patch :update_manual
+      patch :assign_question
+      patch :mark_correct
+      patch :mark_incorrect
+      patch :open_steal
+      patch :close_steal
+      patch :award_steal
+    end
+  end
 end

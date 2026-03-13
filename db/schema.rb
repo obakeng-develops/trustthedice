@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_13_081755) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_13_100128) do
   create_table "buzzes", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "player_id", null: false
@@ -90,6 +90,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_13_081755) do
     t.json "question_payload"
     t.string "question_source"
     t.integer "rep_id"
+    t.boolean "reroll_difficulty_used", default: false, null: false
+    t.boolean "reroll_topic_used", default: false, null: false
     t.integer "round_id", null: false
     t.boolean "steal_correct"
     t.boolean "steal_open", default: false, null: false
