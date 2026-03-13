@@ -1,0 +1,33 @@
+<% round = game.rounds.order(number: :desc).first %>
+<% turn = round&.turns&.order(created_at: :desc)&.first %>
+
+<% if round.present? && turn.nil? %>
+  <section class="card">
+    <h2>Round <%= round.number %> Started</h2>
+    <% if game.teams.any? %>
+      <ul class="list">
+        <% game.teams.each do |team| %>
+          <% rep_id = round.reps[team.id.to_s] %>
+          <% rep = team.players.find { |player| player.id == rep_id.to_i } %>
+          <li>
+            <strong><%= team.name %></strong>
+            <span class="muted">Rep: <%= rep ? rep.name : "Not assigned" %></span>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="muted">Teams are being set up.</p>
+    <% end %>
+    <p class="muted">Waiting for the host to start a turn.</p>
+  </section>
+<% elsif turn.present? %>
+  <section class="card">
+    <h2>Current Turn</h2>
+    <p>
+      Team: <strong><%= turn.team.name %></strong>
+      <% if turn.rep %>
+        · Rep: <%= turn.rep.name %>
+      <% end %>
+    </p>
+  </section>
+<% end %>

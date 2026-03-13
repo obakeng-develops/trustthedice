@@ -1,0 +1,50 @@
+<% round = game.rounds.order(number: :desc).first %>
+<% turn = round&.turns&.order(created_at: :desc)&.first %>
+
+<section class="card">
+  <h2>Round Setup</h2>
+
+  <%= button_to "Start New Round", rounds_game_path(game), method: :post %>
+
+  <% if round.present? %>
+    <h3>Round <%= round.number %> Representatives</h3>
+
+    <%= form_with model: round, url: round_path(round), method: :patch do |form| %>
+      <% game.teams.each do |team| %>
+        <div class="field">
+          <%= form.label "rep_#{team.id}", "#{team.name} rep" %>
+          <%= form.select "reps[#{team.id}]", options_from_collection_for_select(team.players, :id, :name, round.reps[team.id.to_s]), include_blank: true %>
+        </div>
+      <% end %>
+      <%= form.submit "Save Reps" %>
+    <% end %>
+  <% end %>
+</section>
+
+<% if round.present? %>
+  <% reps_ready = game.teams.all? { |team| round.reps[team.id.to_s].present? } %>
+  <section class="card">
+    <h2>Start Turn</h2>
+
+    <% if reps_ready %>
+      <%= form_with url: turns_game_path(game), method: :post do |form| %>
+        <div class="field">
+          <%= form.label :team_id, "Team" %>
+          <%= select_tag "turn[team_id]", options_from_collection_for_select(game.teams, :id, :name), required: true %>
+        </div>
+        <%= form.submit "Start Turn" %>
+      <% end %>
+    <% else %>
+      <p class="muted">Assign representatives for all teams to start a turn.</p>
+    <% end %>
+
+    <% if turn %>
+      <p class="muted">
+        Current turn: <strong><%= turn.team.name %></strong>
+        <% if turn.rep %>
+          · Rep: <%= turn.rep.name %>
+        <% end %>
+      </p>
+    <% end %>
+  </section>
+<% end %>
