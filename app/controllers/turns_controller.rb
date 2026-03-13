@@ -6,7 +6,8 @@ class TurnsController < ApplicationController
     :mark_incorrect,
     :open_steal,
     :close_steal,
-    :award_steal
+    :award_steal,
+    :next_question
   ]
 
   def create
@@ -22,14 +23,15 @@ class TurnsController < ApplicationController
       rep_id: rep_id,
       topic: nil,
       difficulty: nil,
-      timer_seconds: game.settings["timer_seconds"] || 30
+      timer_seconds: game.settings["timer_seconds"] || 30,
+      state: "dice_ready"
     )
     GameBroadcaster.broadcast(game)
     redirect_to host_game_path(game, token: game.host_token)
   end
 
   def update_manual
-    @turn.update!(manual_params)
+    @turn.update!(manual_params.merge(state: "dice_ready"))
     GameBroadcaster.broadcast(@turn.round.game)
     redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token)
   end
@@ -63,13 +65,15 @@ class TurnsController < ApplicationController
       @turn.update!(question: nil, question_payload: payload, question_source: question.source)
     end
 
+    @turn.update!(state: "question_assigned")
+
     GameBroadcaster.broadcast(@turn.round.game)
     redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token)
   end
 
   def mark_correct
     points = ScoreCalculator.call(@turn, correct: true)
-    @turn.update!(answered_correct: true, points_awarded: points)
+    @turn.update!(answered_correct: true, points_awarded: points, state: "ready_for_next", steal_open: false)
     @turn.team.update!(score: @turn.team.score + points)
     @turn.round.increment_rep_question_count(@turn.rep_id)
     GameBroadcaster.broadcast(@turn.round.game)
@@ -78,7 +82,7 @@ class TurnsController < ApplicationController
 
   def mark_incorrect
     points = ScoreCalculator.call(@turn, correct: false)
-    @turn.update!(answered_correct: false, points_awarded: points)
+    @turn.update!(answered_correct: false, points_awarded: points, state: "answered")
     @turn.team.update!(score: @turn.team.score + points)
     @turn.round.increment_rep_question_count(@turn.rep_id)
     @turn.update!(steal_open: true, steal_started_at: Time.current, steal_winner_team_id: nil, steal_winner_player_id: nil)
@@ -93,7 +97,7 @@ class TurnsController < ApplicationController
   end
 
   def close_steal
-    @turn.update!(steal_open: false)
+    @turn.update!(steal_open: false, state: "ready_for_next")
     GameBroadcaster.broadcast(@turn.round.game)
     redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token)
   end
@@ -110,7 +114,33 @@ class TurnsController < ApplicationController
       team.update!(score: team.score + points)
     end
 
+    @turn.update!(state: "ready_for_next", steal_open: false)
+
     GameBroadcaster.broadcast(@turn.round.game)
+    redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token)
+  end
+
+  def next_question
+    @turn.update!(
+      topic: nil,
+      difficulty: nil,
+      question_id: nil,
+      question_payload: nil,
+      question_source: nil,
+      answered_correct: nil,
+      points_awarded: nil,
+      steal_open: false,
+      steal_started_at: nil,
+      steal_winner_team_id: nil,
+      steal_winner_player_id: nil,
+      steal_team_id: nil,
+      steal_correct: nil,
+      reroll_topic_used: false,
+      reroll_difficulty_used: false,
+      state: "dice_ready"
+    )
+
+    GameBroadcaster.broadcast(@turn.round.game, focus_dice: true)
     redirect_to host_game_path(@turn.round.game, token: @turn.round.game.host_token)
   end
 

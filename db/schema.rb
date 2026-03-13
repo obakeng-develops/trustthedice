@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_13_104007) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_13_105509) do
   create_table "buzzes", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "player_id", null: false
@@ -94,6 +94,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_13_104007) do
     t.boolean "reroll_difficulty_used", default: false, null: false
     t.boolean "reroll_topic_used", default: false, null: false
     t.integer "round_id", null: false
+    t.string "state", default: "dice_ready", null: false
     t.boolean "steal_correct"
     t.boolean "steal_open", default: false, null: false
     t.datetime "steal_started_at"
@@ -111,6 +112,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_13_104007) do
     t.index ["question_id"], name: "index_turns_on_question_id"
     t.index ["rep_id"], name: "index_turns_on_rep_id"
     t.index ["round_id"], name: "index_turns_on_round_id"
+    t.index ["state"], name: "index_turns_on_state"
     t.index ["steal_open"], name: "index_turns_on_steal_open"
     t.index ["steal_team_id"], name: "index_turns_on_steal_team_id"
     t.index ["steal_winner_player_id"], name: "index_turns_on_steal_winner_player_id"

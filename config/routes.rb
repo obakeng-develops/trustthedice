@@ -26,6 +26,7 @@ Rails.application.routes.draw do
       patch :open_steal
       patch :close_steal
       patch :award_steal
+      patch :next_question
     end
   end
 end
