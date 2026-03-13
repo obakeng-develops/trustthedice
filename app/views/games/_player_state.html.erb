@@ -1,0 +1,24 @@
+<section class="card">
+  <h2>Game Status</h2>
+
+  <% round = game.current_round %>
+  <% turn = game.current_turn %>
+
+  <% if turn %>
+    <p>
+      Current team: <strong><%= turn.team.name %></strong>
+      <% if turn.rep %>
+        · Rep: <%= turn.rep.name %>
+      <% end %>
+    </p>
+    <p class="muted">Steal window: <%= turn.steal_open? ? "open" : "closed" %></p>
+
+    <% if turn.steal_open? %>
+      <div data-controller="buzz" data-buzz-turn-id-value="<%= turn.id %>" data-buzz-player-id-value="<%= current_player&.id %>" data-buzz-game-id-value="<%= game.id %>">
+        <button type="button" data-action="buzz#send">Buzz</button>
+      </div>
+    <% end %>
+  <% else %>
+    <p class="muted">Waiting for the host to start a turn.</p>
+  <% end %>
+</section>

@@ -1,4 +1,5 @@
 <main class="page">
+  <%= turbo_stream_from "game_#{@game.id}" %>
   <header class="page-header">
     <h1>Host Dashboard</h1>
     <div class="meta">Game <%= @game.id %> · Status: <%= @game.status %></div>
@@ -59,4 +60,8 @@
       <% end %>
     <% end %>
   </section>
+
+  <div id="host-state">
+    <%= render "host_state", game: @game %>
+  </div>
 </main>

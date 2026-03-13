@@ -9,10 +9,17 @@ Rails.application.routes.draw do
       post :players, to: "players#create"
       post :teams, to: "teams#create"
       post :rounds, to: "rounds#create"
+      post :turns, to: "turns#create"
     end
   end
 
   get "games/:id/host/:token", to: "games#show", as: :host_game
 
   resources :rounds, only: [ :update ]
+  resources :turns, only: [] do
+    member do
+      patch :open_steal
+      patch :close_steal
+    end
+  end
 end

@@ -1,9 +1,13 @@
 <main class="page">
+  <%= turbo_stream_from "game_#{@game.id}" %>
   <h1>Join Game</h1>
 
   <% if current_player %>
     <p>You are in as <strong><%= current_player.name %></strong>.</p>
     <p class="muted">Waiting for the host to start the round.</p>
+    <div id="player-state">
+      <%= render "player_state", game: @game %>
+    </div>
   <% elsif @teams.any? %>
     <%= form_with url: players_game_path(@game), method: :post do |form| %>
       <div class="field">

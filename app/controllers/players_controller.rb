@@ -5,6 +5,7 @@ class PlayersController < ApplicationController
     player = team.players.create!(player_params)
 
     session[:player_id] = player.id
+    GameBroadcaster.broadcast(game)
     redirect_to join_game_path(game)
   end
 

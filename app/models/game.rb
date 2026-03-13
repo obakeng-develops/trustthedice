@@ -16,6 +16,14 @@ class Game < ApplicationRecord
     status == "lobby"
   end
 
+  def current_round
+    rounds.order(number: :desc).first
+  end
+
+  def current_turn
+    current_round&.turns&.order(created_at: :desc)&.first
+  end
+
   private
 
   def ensure_host_token

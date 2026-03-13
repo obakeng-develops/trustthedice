@@ -1,0 +1,55 @@
+<section class="card">
+  <h2>Live State</h2>
+
+  <% round = game.current_round %>
+  <% turn = game.current_turn %>
+
+  <div class="muted">
+    <% if round %>
+      Round <%= round.number %>
+    <% else %>
+      No active round
+    <% end %>
+  </div>
+
+  <% if turn %>
+    <p>
+      Current turn for <strong><%= turn.team.name %></strong>
+      <% if turn.rep %>
+        · Rep: <%= turn.rep.name %>
+      <% end %>
+    </p>
+    <p class="muted">
+      Steal window: <%= turn.steal_open? ? "open" : "closed" %>
+      <% if turn.steal_winner_team %>
+        · First buzz: <%= turn.steal_winner_team.name %> (<%= turn.steal_winner_player&.name %>)
+      <% end %>
+    </p>
+
+    <div class="inline-form">
+      <% if turn.steal_open? %>
+        <%= button_to "Close Steal Window", close_steal_turn_path(turn), method: :patch %>
+      <% else %>
+        <%= button_to "Open Steal Window", open_steal_turn_path(turn), method: :patch %>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="muted">No current turn. Start one to enable buzzing.</p>
+  <% end %>
+</section>
+
+<section class="card">
+  <h2>Start Turn (Phase 1)</h2>
+
+  <% if round && round.reps.present? %>
+    <%= form_with url: turns_game_path(game), method: :post do |form| %>
+      <div class="field">
+        <%= form.label :team_id, "Team" %>
+        <%= select_tag "turn[team_id]", options_from_collection_for_select(game.teams, :id, :name), required: true %>
+      </div>
+      <%= form.submit "Start Turn" %>
+    <% end %>
+  <% else %>
+    <p class="muted">Assign reps to start a turn.</p>
+  <% end %>
+</section>
