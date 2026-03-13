@@ -29,5 +29,9 @@
         · Rep: <%= turn.rep.name %>
       <% end %>
     </p>
+    <% questions_per_rep = (game.settings["questions_per_rep"].presence || 3).to_i %>
+    <% rep_count = round.rep_question_count(turn.rep_id) %>
+    <% question_index = [rep_count + 1, questions_per_rep].min %>
+    <p class="mt-1 text-xs text-stone-500">Question <%= question_index %> of <%= questions_per_rep %></p>
   </section>
 <% end %>
