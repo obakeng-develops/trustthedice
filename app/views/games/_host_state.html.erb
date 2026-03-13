@@ -13,7 +13,7 @@
       <% game.teams.each do |team| %>
         <div class="field">
           <%= form.label "rep_#{team.id}", "#{team.name} rep" %>
-          <%= form.select "reps[#{team.id}]", options_from_collection_for_select(team.players, :id, :name, round.reps[team.id.to_s]), include_blank: true %>
+          <%= select_tag "round[reps][#{team.id}]", options_from_collection_for_select(team.players, :id, :name, round.reps[team.id.to_s]), include_blank: true %>
         </div>
       <% end %>
       <%= form.submit "Save Reps" %>
