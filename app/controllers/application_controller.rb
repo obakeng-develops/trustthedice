@@ -3,7 +3,7 @@ class ApplicationController < ActionController::Base
   allow_browser versions: :modern
 
   helper_method :current_player
-  helper_method :host_link, :on_host_page?
+  helper_method :host_link, :on_host_page?, :current_player_for_game?
 
   private
 
@@ -11,6 +11,12 @@ class ApplicationController < ActionController::Base
     return unless session[:player_id]
 
     @current_player ||= Player.find_by(id: session[:player_id])
+  end
+
+  def current_player_for_game?(game)
+    return false unless session[:player_game_id]
+
+    session[:player_game_id].to_i == game.id
   end
 
   def host_link

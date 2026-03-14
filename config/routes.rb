@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   resources :games, only: [ :create ] do
     member do
       get :join
+      post :leave
       patch :update_settings
       post :players, to: "players#create"
       post :teams, to: "teams#create"

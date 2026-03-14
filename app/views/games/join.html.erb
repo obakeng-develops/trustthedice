@@ -6,7 +6,12 @@
       <%= link_to "Rules", rules_path(game_id: @game.id), class: "text-xs font-semibold uppercase tracking-[0.2em] text-stone-500 hover:text-stone-700" %>
     </div>
 
-    <% if current_player %>
+    <% if @join_locked %>
+      <p class="mt-3 text-sm text-stone-600">
+        You are already in another game. Leave it before joining this one.
+      </p>
+      <%= button_to "Leave current game", leave_game_path(@game), method: :post, class: "mt-4 rounded-full bg-stone-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-stone-800" %>
+    <% elsif current_player && current_player_for_game?(@game) %>
       <p class="mt-3 text-sm text-stone-600">You are in as <strong class="text-stone-900"><%= current_player.name %></strong>.</p>
       <p class="mt-1 text-sm text-stone-500">
         <%= @round.present? ? "Waiting for the host to start a turn." : "Waiting for the host to start the round." %>
