@@ -13,5 +13,12 @@ class GameBroadcaster
       partial: "games/player_state",
       locals: { game: game }
     )
+
+    Turbo::StreamsChannel.broadcast_replace_to(
+      "game_#{game.id}",
+      target: "leaderboard-state",
+      partial: "leaderboards/leaderboard_state",
+      locals: { game: game }
+    )
   end
 end

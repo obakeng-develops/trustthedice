@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   root "games#new"
 
   get "rules", to: "rules#show", as: :rules
+  get "leaderboard/:id/:token", to: "leaderboards#show", as: :leaderboard
 
   resources :games, only: [ :create ] do
     member do
