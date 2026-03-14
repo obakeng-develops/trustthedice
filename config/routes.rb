@@ -21,6 +21,7 @@ Rails.application.routes.draw do
   resources :rounds, only: [ :update ]
   resources :turns, only: [] do
     member do
+      post :buzz
       patch :update_manual
       patch :assign_question
       patch :mark_correct
