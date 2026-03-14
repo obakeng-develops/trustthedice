@@ -1,5 +1,6 @@
 class TurnsController < ApplicationController
   before_action :set_turn, only: [
+    :buzz,
     :update_manual,
     :assign_question,
     :mark_correct,
@@ -28,6 +29,23 @@ class TurnsController < ApplicationController
     )
     GameBroadcaster.broadcast(game)
     redirect_to host_game_path(game, token: game.host_token)
+  end
+
+  def buzz
+    player = current_player
+    return head :unauthorized unless player
+    return head :unprocessable_entity unless @turn.steal_open?
+    return head :conflict if @turn.steal_winner_player_id.present?
+    return head :forbidden if player.team_id == @turn.team_id
+
+    Buzz.create!(turn: @turn, team_id: player.team_id, player_id: player.id)
+    @turn.update!(steal_winner_team_id: player.team_id, steal_winner_player_id: player.id)
+
+    GameBroadcaster.broadcast(@turn.round.game)
+    respond_to do |format|
+      format.turbo_stream { render turbo_stream: [] }
+      format.html { redirect_to join_game_path(@turn.round.game) }
+    end
   end
 
   def update_manual
