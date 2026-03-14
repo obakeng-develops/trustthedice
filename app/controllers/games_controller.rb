@@ -1,5 +1,5 @@
 class GamesController < ApplicationController
-  before_action :set_game, only: [ :show, :join, :update_settings ]
+  before_action :set_game, only: [ :show, :join, :update_settings, :leave ]
   before_action :require_host_token, only: [ :show, :update_settings ]
 
   def new
@@ -22,6 +22,13 @@ class GamesController < ApplicationController
     @teams = @game.teams.order(:name)
     @round = @game.rounds.order(number: :desc).first
     @turn = @round&.turns&.order(created_at: :desc)&.first
+    @join_locked = session[:player_id].present? && session[:player_game_id].present? && session[:player_game_id] != @game.id
+  end
+
+  def leave
+    session[:player_id] = nil
+    session[:player_game_id] = nil
+    redirect_to join_game_path(@game)
   end
 
   def update_settings
