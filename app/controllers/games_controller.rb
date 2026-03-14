@@ -14,6 +14,8 @@ class GamesController < ApplicationController
     @teams = @game.teams.includes(:players)
     @round = @game.rounds.order(number: :desc).first
     @turn = @round&.turns&.order(created_at: :desc)&.first
+    session[:host_game_id] = @game.id
+    session[:host_token] = @game.host_token
   end
 
   def join
