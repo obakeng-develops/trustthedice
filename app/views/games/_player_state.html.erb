@@ -34,6 +34,12 @@
     <% question_index = [rep_count + 1, questions_per_rep].min %>
     <p class="mt-1 text-xs text-stone-500">Question <%= question_index %> of <%= questions_per_rep %></p>
 
+    <% if turn.points_awarded.present? %>
+      <% points = turn.points_awarded.to_i %>
+      <% label = points.positive? ? "+#{points}" : points.to_s %>
+      <p class="mt-2 text-xs text-stone-600">Points applied: <%= label %></p>
+    <% end %>
+
     <% show_banner = turn.steal_open? && current_player&.team_id && current_player.team_id != turn.team_id && turn.steal_winner_player_id.nil? %>
     <% if show_banner %>
       <div class="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
